@@ -1,4 +1,4 @@
-package com.dongwon.excel.chart;
+package com.dongwon.excel.sheet;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -8,13 +8,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class RateBarChartBuilder implements ChartBuilder {
-    private Map<String, RateBarChartData> valueMap = new HashMap<>();
+public class PieChartBuilder implements ChartBuilder {
+    private Map<String, PieChartData> valueMap = new HashMap<>();
     private int titleRow = -1;
     private int valueRow = -1;
 
+    @Override
     public void setData(@Nonnull String title, int... value) {
-        valueMap.put(title, new RateBarChartData(title, value));
+        valueMap.put(title, new PieChartData(title, value[0]));
     }
 
     @Override
@@ -33,24 +34,22 @@ public class RateBarChartBuilder implements ChartBuilder {
             throw new IllegalStateException("not setting title orr value row");
         }
         Row titleRow = sheet.getRow(this.titleRow);
-        Row value1Row = sheet.getRow(this.valueRow);
-        Row value2Row = sheet.getRow(this.valueRow + 1);
+        Row valueRow = sheet.getRow(this.valueRow);
         AtomicInteger columnNum = new AtomicInteger(0);
         valueMap.values().forEach(v -> {
             int nowColumnNum = columnNum.getAndIncrement();
-            if (v.value != null && v.value.length == 2) {
+            if (v.value > 0) {
                 titleRow.getCell(nowColumnNum).setCellValue(v.title);
-                value1Row.getCell(nowColumnNum).setCellValue(v.value[0]);
-                value2Row.getCell(nowColumnNum).setCellValue(v.value[1]);
+                valueRow.getCell(nowColumnNum).setCellValue(v.value);
             }
         });
     }
 
-    private class RateBarChartData {
+    private class PieChartData {
         private String title;
-        private int[] value;
+        private int value;
 
-        RateBarChartData(String title, int[] value) {
+        PieChartData(String title, int value) {
             this.title = title;
             this.value = value;
         }
